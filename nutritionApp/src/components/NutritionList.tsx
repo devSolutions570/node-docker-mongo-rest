@@ -7,8 +7,9 @@ import nutritions from '../store/NutritionsStore';
 import { useFocusEffect } from '@react-navigation/native';
 import { view } from '@risingstack/react-easy-state';
 import { NavigationParams } from 'react-navigation';
-import { NutritionCheck } from '../types/types'
+import { Nutrition, NutritionCheck } from '../types/types'
 import CheckBox from '@react-native-community/checkbox';
+import * as nutritionAPI from "../util/nutrition/nutritionApi"
 
 type Props = {
     update: string;
@@ -20,23 +21,40 @@ const NutritionList: React.FC<Props> = ({ navigation, update }) => {
     const [selectAll, setSelectAll] = useState(false);
     const [selectedCount, setSelectedCount] = useState(0);
 
+    async function getNutritions() {
+        return await nutritionAPI.getAll();
+    }
+
+    async function deleteNutrition(id: string) {
+        return await nutritionAPI.deletebyID(id);
+    }
+
+    async function resetNutritions() {
+        return await nutritionAPI.reset();
+    }
+
     useFocusEffect(
         React.useCallback(() => {
             let newCheckIDs: NutritionCheck[] = [];
             
-            nutritions.all.forEach((nutrition, index) => {
-                newCheckIDs[index] = {
-                    id: nutrition.id,
-                    checked: false
-                }
+            getNutritions().then((result) => {
+                let nutritionArray: Nutrition[] = result as Nutrition[];
+                nutritions.setDatas(nutritionArray);
+                nutritionArray.forEach((nutrition, index) => {
+                    newCheckIDs[index] = {
+                        id: nutrition._id,
+                        checked: false
+                    }
+                })
+                
+                setCheckedIDs(newCheckIDs);
+                navigation.navigate("Home", { update: false })
             })
-            
-            setCheckedIDs(newCheckIDs);
-            navigation.navigate("Home", { update: false })
         }, [])
     );
 
     const handleResetDataClick = () => {
+        resetNutritions();
         nutritions.reset();
         setSelectedCount(0);
         setSelectAll(false);
@@ -44,7 +62,7 @@ const NutritionList: React.FC<Props> = ({ navigation, update }) => {
     }
 
     const handleAddNutritionClick = () => {
-        let index = -1;
+        let index = "create";
         setSelectedCount(0);
         navigation.navigate('AddNutrition', { editIndex: index });
     }
@@ -57,11 +75,13 @@ const NutritionList: React.FC<Props> = ({ navigation, update }) => {
                 [
                     {
                         text: 'YES', onPress: () => {
-                            checkedIDs.map((obj, i) => {
-                                if (obj.checked === true) {
-                                    nutritions.delete(obj.id);
+                            for (let i = 0; i < checkedIDs.length; i ++) {
+                                if (checkedIDs[i].checked === true) {
+                                    deleteNutrition(checkedIDs[i].id);
+                                    nutritions.delete(checkedIDs[i].id);
                                 }
-                            });
+                            }
+                            
                             for (let i = 0; i < checkedIDs.length; i++) {
                                 if (checkedIDs[i].checked === true) {
                                     checkedIDs.splice(i, 1);
@@ -80,7 +100,7 @@ const NutritionList: React.FC<Props> = ({ navigation, update }) => {
         }
     }
 
-    const selectRow = (id: number) => {
+    const selectRow = (id: string) => {
         let selectedNutrition: NutritionCheck[];
         selectedNutrition = checkedIDs.filter(item => item.id === id);
         selectedNutrition[0].checked = !selectedNutrition[0].checked;
@@ -98,7 +118,7 @@ const NutritionList: React.FC<Props> = ({ navigation, update }) => {
         let newCheckIDs: NutritionCheck[] = [];
         nutritions.all.map((nutrition, i) => {
             newCheckIDs[i] = {
-                id: nutrition.id,
+                id: nutrition._id,
                 checked: newValue
             }
         })
@@ -154,15 +174,15 @@ const NutritionList: React.FC<Props> = ({ navigation, update }) => {
                             return (
                                 <DataTable.Row style={styles.tableRow} key={i} >
                                     <DataTable.Cell><CheckBox boxType="square" value={(checkedIDs[i] !== undefined) ? checkedIDs[i].checked : false} onValueChange={() => {
-                                        selectRow(nutrition.id);
-                                    }} key={nutrition.id} /></DataTable.Cell>
+                                        selectRow(nutrition._id);
+                                    }} key={nutrition._id} /></DataTable.Cell>
                                     <DataTable.Cell numeric onPress={() => {
                                         setSelectedCount(0);
-                                        navigation.navigate('EditNutrition', { editIndex: i });
+                                        navigation.navigate('EditNutrition', { editIndex: nutrition._id });
                                     }}>{nutrition.dessertName}</DataTable.Cell>
                                     <DataTable.Cell numeric onPress={() => {
                                         setSelectedCount(0);
-                                        navigation.navigate('EditNutrition', { editIndex: i });
+                                        navigation.navigate('EditNutrition', { editIndex: nutrition._id });
                                     }}>{nutrition.calories}</DataTable.Cell>
                                     <DataTable.Cell numeric>{nutrition.fat}</DataTable.Cell>
                                     <DataTable.Cell numeric>{nutrition.carbs}</DataTable.Cell>

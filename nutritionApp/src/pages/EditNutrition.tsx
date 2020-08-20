@@ -6,10 +6,11 @@ import { view } from '@risingstack/react-easy-state';
 import { RouteProp } from '@react-navigation/native';
 import { NavigationParams } from 'react-navigation';
 import { Nutrition } from '../types/types'
+import * as nutritionAPI from "../util/nutrition/nutritionApi"
 
 type RootStackParamList = {
     params: {
-        editIndex: number;
+        editIndex: string;
     }
 };
 
@@ -52,6 +53,11 @@ const AddNutrition: React.FC<Props> = ({ route, navigation }) => {
         result = nutritions.all.filter((obj: Nutrition) => obj.dessertName === dessertName)  
         return (result.length > 0)
     }
+
+    async function createNutrition(nutrition) {
+        return await nutritionAPI.create(nutrition);
+    }
+
     const handleSubmitButtonClick = () => {
         if(
             dessertName.length < 1 ||
@@ -92,31 +98,37 @@ const AddNutrition: React.FC<Props> = ({ route, navigation }) => {
         }
         setValidationError(false);
             let nutrition: Nutrition = {
-                id: 0,
+                _id: "",
                 dessertName,
                 calories,
                 fat,
                 carbs,
                 protein
             };
-            if ( editIndex === -1) {
-                nutritions.create(nutrition);
+            if ( editIndex === "create") {
+                createNutrition(nutrition)
+                .then((result) => {
+                    let home: string = 'Home';
+                    navigation.navigate(home, {update: true});
+                })
             } else {
-                nutritions.update(editIndex, nutrition);
+                nutrition._id = editIndex;
+                createNutrition(nutrition)
+                .then((result) => {
+                    let home: string = 'Home';
+                    navigation.navigate(home, {update: true});
+                })
             }
-            
-            let home: string = 'Home';
-            navigation.navigate(home, {update: true});
         };
 
         useEffect(() => {
-            if ( editIndex !== -1 ) {
-                let nutritionObject: Nutrition = nutritions.all[editIndex];
+            if ( editIndex !== "create" ) {
+                let nutritionObject: Nutrition = nutritions.get(editIndex);
                 setDessertName(nutritionObject.dessertName)
-                setCalories(nutritionObject.calories)
-                setFat(nutritionObject.fat)
-                setCarbs(nutritionObject.carbs)
-                setProtein(nutritionObject.protein)
+                setCalories(nutritionObject.calories.toString())
+                setFat(nutritionObject.fat.toString())
+                setCarbs(nutritionObject.carbs.toString())
+                setProtein(nutritionObject.protein.toString())
             }
         }, [editIndex]);
 

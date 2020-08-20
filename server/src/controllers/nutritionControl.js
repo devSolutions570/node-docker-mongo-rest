@@ -3,15 +3,9 @@
 const Nutrition = require('../models/nutrition');
 
 class NutritionRepository {
-    constructor() {
-        this.nutritions = new Map([]);
-    }
-
     getById(id) {
-        console.log('calling model get by id...')
         return Nutrition.find({_id: id});
     }
-
     getAll() {
         return Nutrition.find({})
             .then((items) => {
@@ -21,7 +15,6 @@ class NutritionRepository {
                 return { error: "no Item found"}
             })
     }
-
     delete(id) {
         return Nutrition.deleteOne({ _id: id }).then(() => {
             return Nutrition.find()
@@ -31,6 +24,14 @@ class NutritionRepository {
                 .catch((error) => {
                     return { error: "no Item found"}
                 })
+        })
+        .catch(() => {
+            return { error: "delete failed"}
+        });
+    }
+    reset(id) {
+        return Nutrition.deleteMany().then(() => {
+            return { success: "reset successed!"};
         })
         .catch(() => {
             return { error: "delete failed"}

@@ -20,13 +20,19 @@ app.get('/all', (req, res) => {
 app.get('/delete/:id', (req, res) => {
     console.log("remove api calling.")
     nutritionRepo.delete(req.params.id).then((result) => {
-        console.log(result)
+        res.send(result);
+    });
+})
+app.get('/reset', (req, res) => {
+    console.log("reset api calling.")
+    nutritionRepo.reset().then((result) => {
         res.send(result);
     });
 })
 app.post('/save', (req, res) => {
     const nutrition = req.body;
-    if (nutrition._id != undefined) {
+
+    if (nutrition._id != "") {
         nutritionRepo.getById(nutrition._id).then((result)=> {
             if ( result !== {}) {
                 nutritionRepo.update(nutrition).then((result) => {

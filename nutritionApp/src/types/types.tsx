@@ -1,5 +1,5 @@
 export type Nutrition = {
-    id: number;
+    _id: string;
     dessertName: string;
     calories: string;
     fat: string;
@@ -8,6 +8,6 @@ export type Nutrition = {
 };
 
 export type NutritionCheck = {
-    id: number;
+    id: string;
     checked: boolean;
 }
