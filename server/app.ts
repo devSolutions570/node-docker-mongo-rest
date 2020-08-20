@@ -1,9 +1,8 @@
 'use strict';
-
+import { Request, Response } from 'express';
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-// const config = require('./config');
 const app = new express();
 
 // register JSON parser middlewear
@@ -23,7 +22,7 @@ const connectWithRetry = () => {
   console.log('MongoDB connection with retry')
   mongoose.connect("mongodb://mongo:27017/node-app", options).then(()=>{
     console.log('MongoDB is connected')
-  }).catch(err=>{
+  }).catch(()=>{
     console.log('MongoDB connection unsuccessful, retry after 5 seconds.')
     setTimeout(connectWithRetry, 5000)
   })
@@ -32,11 +31,12 @@ const connectWithRetry = () => {
 connectWithRetry()
 
 var nutritionRouter = require('./src/routes/nutritionRoutes');
-// var versionRouter = require('./src/routes/versionRoutes')(app, config);
+var versionRouter = require('./src/routes/versionRoutes');
 
 app.use('/', nutritionRouter);
-// app.use('/', versionRouter);
-app.get('/ping', (req, res) => {
+app.use('/', versionRouter);
+
+app.get('/ping', (req: Request, res: Response) => {
     res.send('pongpong........!')
 })
 

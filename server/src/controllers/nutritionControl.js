@@ -1,52 +1,51 @@
 'use strict';
-
-const Nutrition = require('../models/nutrition');
-
+Object.defineProperty(exports, "__esModule", { value: true });
+const NutritionModel = require('../models/nutrition');
 class NutritionRepository {
     getById(id) {
-        return Nutrition.find({_id: id});
+        return NutritionModel.find({ _id: id });
     }
     getAll() {
-        return Nutrition.find({})
+        return NutritionModel.find({})
             .then((items) => {
-                return items;
-            })
-            .catch((error) => {
-                return { error: "no Item found"}
-            })
+            return items;
+        })
+            .catch(() => {
+            return { error: "no Item found" };
+        });
     }
     delete(id) {
-        return Nutrition.deleteOne({ _id: id }).then(() => {
-            return Nutrition.find()
-                .then((items) => {
-                    return items;
-                })
-                .catch((error) => {
-                    return { error: "no Item found"}
-                })
+        return NutritionModel.deleteOne({ _id: id }).then(() => {
+            return NutritionModel.find()
+                .then(() => {
+                return { success: "delete success!" };
+            })
+                .catch(() => {
+                return { error: "no Item found" };
+            });
         })
-        .catch(() => {
-            return { error: "delete failed"}
+            .catch(() => {
+            return { error: "delete failed" };
         });
     }
     reset(id) {
-        return Nutrition.deleteMany().then(() => {
-            return { success: "reset successed!"};
+        return NutritionModel.deleteMany().then(() => {
+            return { success: "reset successed!" };
         })
-        .catch(() => {
-            return { error: "delete failed"}
+            .catch(() => {
+            return { error: "delete failed" };
         });
     }
     update(nutrition) {
-        return Nutrition.findOneAndUpdate({_id: nutrition._id}, nutrition).then((result) => {
-            return Nutrition.find()
+        return NutritionModel.findOneAndUpdate({ _id: NutritionModel._id }, nutrition).then(() => {
+            return NutritionModel.find()
                 .then((items) => {
-                    return items;
-                })
-                .catch((error) => {
-                    return { error: "no Item found"}
-                })    
-        })        
+                return items;
+            })
+                .catch(() => {
+                return { error: "no Item found" };
+            });
+        });
     }
     create(nutrition) {
         const newItem = new Nutrition({
@@ -56,23 +55,21 @@ class NutritionRepository {
             carbs: nutrition.carbs,
             protein: nutrition.protein
         });
-        
         return newItem.save()
-        .then((item) => {
-            return Nutrition.find()
+            .then(() => {
+            return NutritionModel.find()
                 .then((items) => {
-                    return items;
-                })
-                .catch((error) => {
-                    return { error: "no Item found"}
-                })    
+                return items;
+            })
+                .catch(() => {
+                return { error: "no Item found" };
+            });
         })
-        .catch((error) => {
-            return { error: "can not add item"}
+            .catch(() => {
+            return { error: "can not add item" };
         });
     }
 }
-
 const nutritionRepository = new NutritionRepository();
-
 module.exports = nutritionRepository;
+//# sourceMappingURL=nutritionControl.js.map
