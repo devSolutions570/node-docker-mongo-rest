@@ -50,7 +50,7 @@ class NutritionRepository {
         })
     }
     create(nutrition: Nutrition) {
-        const newItem = new Nutrition({
+        const newItem = new NutritionModel({
             dessertName: nutrition.dessertName,
             calories: nutrition.calories,
             fat: nutrition.fat,
